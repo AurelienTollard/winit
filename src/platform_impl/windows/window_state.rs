@@ -256,11 +256,14 @@ impl WindowFlags {
 
     pub fn to_window_styles(self) -> (WINDOW_STYLE, WINDOW_EX_STYLE) {
         // Required styles to properly support common window functionality like aero snap.
-        let mut style = WS_CAPTION | WS_BORDER | WS_CLIPSIBLINGS | WS_SYSMENU;
+        let mut style = WS_CLIPSIBLINGS | WS_SYSMENU;
         let mut style_ex = WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES;
 
         if self.contains(WindowFlags::RESIZABLE) {
             style |= WS_SIZEBOX;
+        }
+        if self.contains(WindowFlags::MARKER_DECORATIONS) {
+            style |= WS_CAPTION;
         }
         if self.contains(WindowFlags::MAXIMIZABLE) {
             style |= WS_MAXIMIZEBOX;
@@ -362,20 +365,26 @@ impl WindowFlags {
 
         if diff.contains(WindowFlags::MAXIMIZED) || new.contains(WindowFlags::MAXIMIZED) {
             unsafe {
-                ShowWindow(window, match new.contains(WindowFlags::MAXIMIZED) {
-                    true => SW_MAXIMIZE,
-                    false => SW_RESTORE,
-                });
+                ShowWindow(
+                    window,
+                    match new.contains(WindowFlags::MAXIMIZED) {
+                        true => SW_MAXIMIZE,
+                        false => SW_RESTORE,
+                    },
+                );
             }
         }
 
         // Minimize operations should execute after maximize for proper window animations
         if diff.contains(WindowFlags::MINIMIZED) {
             unsafe {
-                ShowWindow(window, match new.contains(WindowFlags::MINIMIZED) {
-                    true => SW_MINIMIZE,
-                    false => SW_RESTORE,
-                });
+                ShowWindow(
+                    window,
+                    match new.contains(WindowFlags::MINIMIZED) {
+                        true => SW_MINIMIZE,
+                        false => SW_RESTORE,
+                    },
+                );
             }
 
             diff.remove(WindowFlags::MINIMIZED);

@@ -1097,6 +1097,10 @@ unsafe fn public_window_callback_inner(
                 // with the Windows API.
                 params.rgrc[0].top += 1;
                 params.rgrc[0].bottom += 1;
+            } else {
+                // Outside the corner case above, we don't want to change the size of the window.
+                result = ProcResult::DefWindowProc(wparam);
+                return;
             }
 
             result = ProcResult::Value(0);
